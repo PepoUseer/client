@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import CalendarOverview from "./calendar-overview";
 import ReservationItem from "./reservation-item";
 import ReservationForm from "./reservation-form";
@@ -19,6 +20,29 @@ const Dashboard = () => {
   useEffect(() => {
     loadReservations();
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const highlightId = params.get("highlight");
+
+    if (highlightId && reservations.length > 0) {
+      const matched = reservations.find(r => r.id === highlightId);
+
+      if (matched) {
+        // 🔁 Zmeň mesiac podľa rezervácie
+        const targetDate = new Date(matched.startDate); // alebo matched.endDate
+        setDisplayedMonth(targetDate);
+
+        // ⏳ malá pauza, kým sa prepne mesiac, potom zvýrazni
+        setTimeout(() => {
+          handleSelectReservationId([highlightId]);
+        }, 100); // 100 ms delay
+      }
+    }
+  }, [reservations, location]);
+
 
   const loadReservations = () => {
     setIsLoading(true);

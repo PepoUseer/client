@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
+import { Card, Button, ListGroup, Collapse } from "react-bootstrap";
 import { DateTime } from "luxon";
-import { Card, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 function CustomerItem({ customer, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <Card className="mb-3 shadow-sm">
       <Card.Body>
@@ -12,11 +15,51 @@ function CustomerItem({ customer, onEdit, onDelete }) {
         <Card.Text>
           <strong>Email:</strong> {customer.email} <br />
           <strong>Telefón:</strong> {customer.phone} <br />
-          <strong>Dátum registrácie: </strong>
-          <span>
-            {DateTime.fromISO(customer.createdAt).toFormat("dd.MM.yyyy - HH:mm")}
-          </span>
+          <strong>Dátum registrácie:</strong>{" "}
+          {customer.createdAt
+            ? DateTime.fromISO(customer.createdAt).toFormat("dd.MM.yyyy - HH:mm")
+            : "Neznámy"}
         </Card.Text>
+
+        {customer.reservations?.length > 0 && (
+          <>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() => setOpen(!open)}
+              aria-controls={`rezervacie-${customer.id}`}
+              aria-expanded={open}
+              className="mb-2"
+            >
+              {open ? "Skryť rezervácie" : "Zobraziť rezervácie"}
+            </Button>
+
+            <Collapse in={open}>
+              <div id={`rezervacie-${customer.id}`}>
+                <ListGroup variant="flush" className="mb-2">
+                  {customer.reservations.map((res) => (
+                    <Link to={`/?highlight=${res.id}`} className="text-decoration-none">
+                      <ListGroup.Item key={res.id}>
+                        <span className="fw-semibold">
+                          {DateTime.fromISO(res.startDate).isValid
+                            ? DateTime.fromISO(res.startDate).toFormat("dd.MM.yyyy")
+                            : "?"}
+                        </span>{" "}
+                        –{" "}
+                        <span className="fw-semibold">
+                          {DateTime.fromISO(res.endDate).isValid
+                            ? DateTime.fromISO(res.endDate).toFormat("dd.MM.yyyy")
+                            : "?"}
+                        </span>{" "}
+                        <span>({res.title})</span>
+                      </ListGroup.Item>
+                    </Link>
+                  ))}
+                </ListGroup>
+              </div>
+            </Collapse>
+          </>
+        )}
 
         <div className="d-flex justify-content-end">
           <Button
