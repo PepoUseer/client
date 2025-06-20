@@ -6,22 +6,15 @@ import TransactionForm from "./transaction-form";
 import ReservationForm from "./reservation-form";
 import TransactionItem from "./transaction-item";
 
-const ReservationItem = ({ reservation, onUpdated, highlight }) => {
+const ReservationItem = ({ reservation, onUpdated, highlight, customers }) => {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState(null);
-  const [customers, setCustomers] = useState([]);
   const [transactionMode, setTransactionMode] = useState("create");
   const [transactionData, setTransactionData] = useState(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
-  useEffect(() => {
-    FetchHelper.customer.list()
-      .then(res => setCustomers(res.data || []))
-      .catch(() => setCustomers([]));
-  }, []);
 
   const fetchDetail = async () => {
     try {

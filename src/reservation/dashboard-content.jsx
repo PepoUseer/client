@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CalendarOverview from "./calendar-overview";
 import ReservationItem from "./reservation-item";
 import ReservationForm from "./reservation-form";
@@ -15,34 +15,13 @@ const Dashboard = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [highlightedReservationId, setHighlightedReservationId] = useState([]);
   const [displayedMonth, setDisplayedMonth] = useState(new Date());
+  const [allCustomers, setAllCustomers] = useState([]);
+
   const reservationRefs = useRef({});
-
-  useEffect(() => {
-    loadReservations();
-  }, []);
-
+  const highlightRef = useRef(null);
+  const hasRedirected = useRef(false);
   const location = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const highlightId = params.get("highlight");
-
-    if (highlightId && reservations.length > 0) {
-      const matched = reservations.find(r => r.id === highlightId);
-
-      if (matched) {
-        // 🔁 Zmeň mesiac podľa rezervácie
-        const targetDate = new Date(matched.startDate); // alebo matched.endDate
-        setDisplayedMonth(targetDate);
-
-        // ⏳ malá pauza, kým sa prepne mesiac, potom zvýrazni
-        setTimeout(() => {
-          handleSelectReservationId([highlightId]);
-        }, 100); // 100 ms delay
-      }
-    }
-  }, [reservations, location]);
-
+  const navigate = useNavigate();
 
   const loadReservations = () => {
     setIsLoading(true);
@@ -51,8 +30,25 @@ const Dashboard = () => {
       .then((res) => {
         const data = Array.isArray(res.data?.reservations) ? res.data.reservations : [];
         setReservations(data);
+
         const total = data.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
         setProfit(total);
+
+        // If redirected with highlight
+        const params = new URLSearchParams(location.search);
+        const highlightId = params.get("highlight");
+        const matched = data.find((r) => r.id === highlightId);
+
+        if (highlightId && matched) {
+          const matchedDate = new Date(matched.startDate);
+          setDisplayedMonth(matchedDate);
+          highlightRef.current = highlightId;
+
+          // 🧹 Odstráň highlight z URL
+          const cleaned = new URLSearchParams(location.search);
+          cleaned.delete("highlight");
+          navigate({ pathname: location.pathname, search: cleaned.toString() }, { replace: true });
+        }
       })
       .catch((err) => {
         console.error("Chyba pri načítaní rezervácií:", err);
@@ -63,6 +59,29 @@ const Dashboard = () => {
         setIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    FetchHelper.customer.list()
+      .then(res => setAllCustomers(res.data || []))
+      .catch(() => setAllCustomers([]));
+  }, []);
+
+  useEffect(() => {
+    loadReservations();
+  }, []);
+
+  useEffect(() => {
+    if (highlightRef.current && reservations.length > 0) {
+      const id = highlightRef.current;
+      const exists = reservations.find((r) => r.id === id);
+      if (exists) {
+        setTimeout(() => {
+          handleSelectReservationId([id]);
+        }, 200); // slight delay to allow render
+      }
+      highlightRef.current = null;
+    }
+  }, [reservations]);
 
   const handleSelectReservationId = (ids) => {
     setHighlightedReservationId(ids);
@@ -89,24 +108,24 @@ const Dashboard = () => {
     return (
       (start.getMonth() === month && start.getFullYear() === year) ||
       (end.getMonth() === month && end.getFullYear() === year) ||
-      (start < displayedMonth && end > displayedMonth) // ak sa prekrýva
+      (start < displayedMonth && end > displayedMonth)
     );
   });
 
   const totalProfit = filteredReservations.reduce((sum, r) => {
-  const end = new Date(r.endDate);
-  const month = displayedMonth.getMonth();
-  const year = displayedMonth.getFullYear();
+    const end = new Date(r.endDate);
+    const month = displayedMonth.getMonth();
+    const year = displayedMonth.getFullYear();
 
-  // Započítaj len rezervácie, ktorých endDate patrí do zobrazeného mesiaca
-  if (end.getFullYear() === year && end.getMonth() === month) {
-    const totalPrice = r.totalPrice || 0;
-    const sumTransactions = r.sumReservation || 0;
-    return sum + (sumTransactions + totalPrice);
-  }
+    if (end.getFullYear() === year && end.getMonth() === month) {
+      const totalPrice = r.totalPrice || 0;
+      const sumTransactions = r.sumReservation || 0;
+      return sum + (sumTransactions + totalPrice);
+    }
 
-  return sum;
-}, 0);
+    return sum;
+  }, 0);
+
   return (
     <div className="dashboard container mt-4">
       <h2>Dashboard</h2>
@@ -114,15 +133,23 @@ const Dashboard = () => {
       <div className="row mt-4">
         <div className="col-md-8">
           <CalendarOverview
-            value={date}
+            value={displayedMonth}
             onChange={setDate}
             reservations={reservations}
             onSelectReservationId={handleSelectReservationId}
-            onMonthChange={(date) => setDisplayedMonth(date)}
+            onMonthChange={(date) => {
+              if (
+                date.getMonth() !== displayedMonth.getMonth() ||
+                date.getFullYear() !== displayedMonth.getFullYear()
+              ) {
+                setDisplayedMonth(date);
+              }
+            }}
           />
         </div>
         <div className="col-md-4 d-flex flex-column align-items-end justify-content-start mt-2">
-          <h4>Celkový zisk:&nbsp;
+          <h4>
+            Celkový zisk:&nbsp;
             <span style={{ color: totalProfit >= 0 ? "green" : "red" }}>
               {totalProfit.toLocaleString("cz-CZ")} CZK
             </span>
@@ -153,6 +180,7 @@ const Dashboard = () => {
               <ReservationItem
                 reservation={r}
                 onUpdated={loadReservations}
+                customers={allCustomers}
                 highlight={highlightedReservationId.includes(r.id)}
               />
             </div>

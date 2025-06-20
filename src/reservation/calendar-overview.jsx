@@ -21,8 +21,25 @@ const formatDate = (date) => {
 const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservationId, onMonthChange }) => {
     const [currentDate, setCurrentDate] = useState(new Date(value));
     useEffect(() => {
-        onMonthChange?.(currentDate);
-    }, [currentDate]);
+        if (
+            value &&
+            value instanceof Date &&
+            !isNaN(value) &&
+            value.getMonth() !== currentDate.getMonth()
+        ) {
+            setCurrentDate(value);
+        }
+    }, [value]);
+    useEffect(() => {
+        if (
+            onMonthChange &&
+            currentDate instanceof Date &&
+            typeof onMonthChange === 'function'
+        ) {
+            onMonthChange(currentDate);
+        }
+    }, [currentDate.getFullYear(), currentDate.getMonth()]);
+
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -108,6 +125,16 @@ const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservat
                 data-tooltip-id={`tooltip-${d}`}
                 data-tooltip-content={tooltipText}
             >
+                {type === "arrival-day" && (
+                    <svg className="svg-triangle arrival" viewBox="0 0 100 100">
+                        <path d="M 100 100 Q 116 101 117 85 L 117 15 Q 117 2 105 0 L 0 100 Z" fill="#ffc107" />
+                    </svg>
+                )}
+                {type === "departure-day" && (
+                    <svg className="svg-triangle departure" viewBox="0 0 100 100">
+                        <path d="M 0 0 Q -16 -1 -17 15 L -17 85 Q -17 98 -5 100 L 100 0 Z" fill="#ffc107" />
+                    </svg>
+                )}
                 <span>{d}</span>
                 <Tooltip id={`tooltip-${d}`} place="top" />
             </div>
@@ -185,31 +212,12 @@ const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservat
             border-radius: 8px;
         }
 
-        .arrival-day::before,
-        .departure-day::before {
-            content: "";
+        .svg-triangle {
             position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
             z-index: 1;
-            width: 0;
-            height: 0;
-        }
-
-        .arrival-day::before {
-            bottom: 0;
-            right: 0;
-            border-bottom: 3.5em solid #ffc107;
-            border-left: 4em solid transparent;
-            border-top-right-radius: 11px;
-            border-bottom-right-radius: 6px;
-        }
-
-        .departure-day::before {
-            top: 0;
-            left: 0;
-            border-top: 3.5em solid #ffc107;
-            border-right: 4em solid transparent;
-            border-top-left-radius: 6px;
-            border-bottom-left-radius: 11px;
         }
 
         .day span {
@@ -219,12 +227,22 @@ const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservat
         }
 
         .today {
-            outline: 2px solid green;
             outline-offset: -2px;
             font-size: 1.2em;
             font-weight: bold;
             color: green;
         }
+
+        .today::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border: 2px solid green;
+            border-radius: 8px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
 
         .legend {
             margin-top: 12px;
@@ -257,6 +275,7 @@ const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservat
             border-right: 1.2em solid transparent;
             border-top-left-radius: 4px;
             border-bottom-left-radius: 4px;
+            transform: translateY(4px);
         }
 
         .legend-arrival::before {
@@ -268,71 +287,7 @@ const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservat
             border-left: 1.2em solid transparent;
             border-top-right-radius: 4px;
             border-bottom-right-radius: 4px;
-        }
-
-        @media (max-width: 481px) {
-            .calendar-wrapper {
-                padding: 0 6px;
-            }
-
-            .day {
-                font-size: .9em;
-            }
-
-            .today {
-                font-size: 1em;
-            }
-            .arrival-day::before {
-                border-bottom: 2.5em solid #ffc107;
-                border-left: 2.8em solid transparent;
-                border-top-right-radius: 11px;
-                border-bottom-right-radius: 6px;
-            }
-
-            .departure-day::before {
-                border-top: 2.5em solid #ffc107;
-                border-right: 2.8em solid transparent;
-                border-top-left-radius: 6px;
-                border-bottom-left-radius: 11px;
-            }
-        }
-        @media (min-width: 481px) and (max-width: 768px) {
-            .arrival-day::before {
-                border-bottom: 2.8em solid #ffc107;
-                border-left: 3.2em solid transparent;
-                border-top-right-radius: 11px;
-                border-bottom-right-radius: 6px;
-            }
-
-            .departure-day::before {
-                border-top: 2.8em solid #ffc107;
-                border-right: 3.2em solid transparent;
-                border-top-left-radius: 6px;
-                border-bottom-left-radius: 11px;
-            }
-        }
-        @media (min-width: 768px) and (max-width: 991px) {
-            .day {
-                font-size: .9em;
-            }
-
-            .today {
-                font-size: 1em;
-            }
-
-            .arrival-day::before {
-                border-bottom: 3.1em solid #ffc107;
-                border-left: 3.3em solid transparent;
-                border-top-right-radius: 11px;
-                border-bottom-right-radius: 6px;
-            }
-
-            .departure-day::before {
-                border-top: 3.1em solid #ffc107;
-                border-right: 3.3em solid transparent;
-                border-top-left-radius: 6px;
-                border-bottom-left-radius: 11px;
-            }
+            transform: translateY(4px);
         }
     `;
 
