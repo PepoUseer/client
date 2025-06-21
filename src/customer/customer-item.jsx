@@ -38,8 +38,12 @@ function CustomerItem({ customer, onEdit, onDelete }) {
               <div id={`rezervacie-${customer.id}`}>
                 <ListGroup variant="flush" className="mb-2">
                   {customer.reservations.map((res) => (
-                    <Link to={`/?highlight=${res.id}`} className="text-decoration-none">
-                      <ListGroup.Item key={res.id}>
+                    <Link
+                      key={res.id}  // ✅ <- presunuté sem
+                      to={`/?highlight=${res.id}`}
+                      className="text-decoration-none"
+                    >
+                      <ListGroup.Item>
                         <span className="fw-semibold">
                           {DateTime.fromISO(res.startDate).isValid
                             ? DateTime.fromISO(res.startDate).toFormat("dd.MM.yyyy")
@@ -60,6 +64,7 @@ function CustomerItem({ customer, onEdit, onDelete }) {
             </Collapse>
           </>
         )}
+
 
         <div className="d-flex justify-content-end">
           <Button

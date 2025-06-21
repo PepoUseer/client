@@ -15,7 +15,20 @@ function CustomerPage() {
     setLoading(true);
     try {
       const res = await FetchHelper.customer.list();
-      setCustomers(res.data || []);
+      const sortedCustomers = (res.data || []).sort((a, b) => {
+        const aResCount = a.reservations?.length || 0;
+        const bResCount = b.reservations?.length || 0;
+
+        if (aResCount > 0 || bResCount > 0) {
+          if (aResCount !== bResCount) {
+            return bResCount - aResCount;
+          }
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        } else {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+      });
+      setCustomers(sortedCustomers);
     } catch (err) {
       console.error("Chyba pri načítaní zákazníkov:", err);
     }

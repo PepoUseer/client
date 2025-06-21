@@ -121,14 +121,51 @@ const ReservationItem = ({ reservation, onUpdated, highlight, customers }) => {
                     )}
                   </ListGroup>
 
-                  <div className="mb-3">
-                    <Button variant="info" className="me-2" onClick={() => setShowCustomerModal(true)}>
+                  {/* 📱 */}
+                  <div className="d-flex flex-column align-items-center d-md-none">
+                    <div className="d-flex justify-content-center mb-2">
+                      <Button
+                        variant="info"
+                        className="me-2"
+                        onClick={() => setShowCustomerModal(true)}
+                      >
+                        Detail zákazníka
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowEditModal(true)}
+                      >
+                        Upraviť
+                      </Button>
+                    </div>
+                    <Button
+                      variant="danger"
+                      onClick={handleDelete}
+                    >
+                      Zmazať rezerváciu
+                    </Button>
+                  </div>
+
+                  {/* 💻 */}
+                  <div className="mb-3 d-none d-md-block">
+                    <Button
+                      variant="info"
+                      className="me-2"
+                      onClick={() => setShowCustomerModal(true)}
+                    >
                       Detail zákazníka
                     </Button>
-                    <Button variant="primary" className="me-2" onClick={() => setShowEditModal(true)}>
+                    <Button
+                      variant="primary"
+                      className="me-2"
+                      onClick={() => setShowEditModal(true)}
+                    >
                       Upraviť
                     </Button>
-                    <Button variant="danger" onClick={handleDelete}>
+                    <Button
+                      variant="danger"
+                      onClick={handleDelete}
+                    >
                       Zmazať rezerváciu
                     </Button>
                   </div>
