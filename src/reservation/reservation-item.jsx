@@ -48,8 +48,8 @@ const ReservationItem = ({ reservation, onUpdated, highlight, customers }) => {
         reservationId: reservation.id,
         transactionId: transactionId
       });
-      await fetchDetail();     // Načítaš detail rezervácie znova
-      await onUpdated();       // Refreshuješ zobrazenie zoznamu rezervácií
+      await fetchDetail();     // Načítame detail rezervácie znova
+      await onUpdated();       // Refreshujeme zobrazenie zoznamu rezervácií
     } catch (err) {
       console.error(err);
       alert("Chyba pri mazaní transakcie.");
@@ -91,7 +91,7 @@ const ReservationItem = ({ reservation, onUpdated, highlight, customers }) => {
                   </ListGroup>
 
                   <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0 mt-1">Tranzakcie</h5>
+                    <h5 className="mb-0 mt-1">Transakcie</h5>
                     <Button variant="secondary" className="me-2 mb-2" onClick={() => {
                       setTransactionData(null);
                       setTransactionMode("create");
@@ -117,7 +117,7 @@ const ReservationItem = ({ reservation, onUpdated, highlight, customers }) => {
                         />
                       ))
                     ) : (
-                      <ListGroup.Item>Žiadne tranzakcie</ListGroup.Item>
+                      <ListGroup.Item>Žiadne transakcie</ListGroup.Item>
                     )}
                   </ListGroup>
 

@@ -312,8 +312,8 @@ const CalendarOverview = ({ value, onChange, reservations = [], onSelectReservat
             </div>
 
             <div className="legend">
-            <div className="legend-item"><span className="legend-arrival" /> příjezd</div>
-            <div className="legend-item"><span className="legend-square" /> obsazeno</div>
+            <div className="legend-item"><span className="legend-arrival" /> príchod</div>
+            <div className="legend-item"><span className="legend-square" /> obsadené</div>
             <div className="legend-item"><span className="legend-departure" /> odchod</div>
             </div>
         </div>
