@@ -37,7 +37,7 @@ function NavBar() {
               active={window.location.pathname === "/customerList"}
               eventKey="customerList"
             >
-              Customers
+              Zákazníci
             </Nav.Link>
           </Nav>
         </Navbar.Collapse>

@@ -34,7 +34,6 @@ const Dashboard = () => {
         const total = data.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
         setProfit(total);
 
-        // If redirected with highlight
         const params = new URLSearchParams(location.search);
         const highlightId = params.get("highlight");
         const matched = data.find((r) => r.id === highlightId);
@@ -44,7 +43,7 @@ const Dashboard = () => {
           setDisplayedMonth(matchedDate);
           highlightRef.current = highlightId;
 
-          // 🧹 Odstráň highlight z URL
+          // Odstránenie highlight rezervácie z URL
           const cleaned = new URLSearchParams(location.search);
           cleaned.delete("highlight");
           navigate({ pathname: location.pathname, search: cleaned.toString() }, { replace: true });
@@ -77,7 +76,7 @@ const Dashboard = () => {
       if (exists) {
         setTimeout(() => {
           handleSelectReservationId([id]);
-        }, 200); // slight delay to allow render
+        }, 200); // Malé oneskorenie pre istotu zobrazenia highlightu
       }
       highlightRef.current = null;
     }
